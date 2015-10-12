@@ -47,11 +47,11 @@ and secondary value."
   #-sbcl
   (error "Not implemented"))
 
-(defun mailbox-receive-message (mailbox &key)
+(defun mailbox-receive-message (mailbox &key timeout)
   "Removes the oldest message from MAILBOX and returns it as the
 primary value. If MAILBOX is empty waits until a message arrives."
   #+sbcl
-  (sb-concurrency:receive-message mailbox))
+  (sb-concurrency:receive-message mailbox :timeout timeout))
 
 (defun mailbox-receive-message-no-hang (mailbox)
   "The non-blocking variant of RECEIVE-MESSAGE. Returns two values,
