@@ -2,9 +2,11 @@
 
 (defpackage :safe-queue
   (:use :cl)
-  (:export #:make-queue
+  (:export #:queue
+           #:make-queue
            #:enqueue
            #:dequeue
+           #:mailbox
            #:make-mailbox
            #:mailbox-empty-p
            #:mailbox-send-message

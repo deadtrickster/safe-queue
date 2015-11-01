@@ -4,6 +4,9 @@
 ;;;; Queues
 ;;;;   Thread safe queue
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(deftype queue ()
+  'chanl:unbounded-channel)
+
 (defun make-queue (&key name initial-contents)
   "Returns a new QUEUE with NAME and contents of the INITIAL-CONTENTS
 sequence enqueued."
@@ -36,6 +39,9 @@ and secondary value."
 #+(or ccl lispworks)
 (defun make-atomic-place (&key val)
   val)
+
+(deftype mailbox ()
+  `(cons atomic-place queue))
 
 (defun make-mailbox (&key name initial-contents)
   "Returns a new MAILBOX with messages in INITIAL-CONTENTS enqueued."  

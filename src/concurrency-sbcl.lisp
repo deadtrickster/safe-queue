@@ -4,6 +4,9 @@
 ;;;; Queues
 ;;;;   Thread safe queue
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(deftype queue ()
+  'sb-concurrency:queue)
+
 (defun make-queue (&key name initial-contents)
   "Returns a new QUEUE with NAME and contents of the INITIAL-CONTENTS
 sequence enqueued."
@@ -25,6 +28,9 @@ and secondary value."
 ;;;; Mailboxes
 ;;;;  Thread safe queue with ability to do blocking reads
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(deftype mailbox ()
+  'sb-concurrency:mailbox)
+
 (defun make-mailbox (&key name initial-contents)
   "Returns a new MAILBOX with messages in INITIAL-CONTENTS enqueued."
   #+sbcl
