@@ -5,100 +5,63 @@
 ;;;;   Thread safe queue
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (deftype queue ()
-  'chanl:unbounded-channel)
+  'lparallel.queue:queue)
 
 (defun make-queue (&key name initial-contents)
   "Returns a new QUEUE with NAME and contents of the INITIAL-CONTENTS
 sequence enqueued."
   (declare (ignorable name))
-  (let ((c (make-instance 'chanl:unbounded-channel)))
-    (loop for i on initial-contents
-       do (chanl:send c i))
-    c))
+  (lparallel.queue:make-queue :initial-contents initial-contents))
 
 (defun enqueue (value queue)
   "Adds VALUE to the end of QUEUE. Returns VALUE."
-  (chanl:send queue value))
+  (lparallel.queue:push-queue value queue))
 
 (defun dequeue (queue)
   "Retrieves the oldest value in QUEUE and returns it as the primary value,
 and T as secondary value. If the queue is empty, returns NIL as both primary
 and secondary value."
-  ;; fixme: doesn't actually return T for second value, returns the queue
-  ;; determine if that matters and either fix it or change docstring
-  (chanl:recv queue :blockp nil))
+  (lparallel.queue:try-pop-queue queue))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Mailboxes
 ;;;;  Thread safe queue with ability to do blocking reads
 ;;;;  and get count of currently queueud items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#+sbcl
-(defstruct atomic-place
-  (val 0 :type (unsigned-byte #+x86-64 64 #+x86 32)))
-#+(or ccl lispworks)
-(defun make-atomic-place (&key val)
-  val)
 
 (deftype mailbox ()
-  `(cons atomic-place queue))
+  'lparallel.queue:queue)
 
 (defun make-mailbox (&key name initial-contents)
-  "Returns a new MAILBOX with messages in INITIAL-CONTENTS enqueued."  
-  (cons
-   (make-atomic-place :val (length initial-contents))
-   (make-queue :name name :initial-contents initial-contents)))
-
-#++
-(defun mailboxp (mailbox)
-  "Returns true if MAILBOX is currently empty, NIL otherwise."
-  (chanl:channelp mailbox))
+  "Returns a new MAILBOX with messages in INITIAL-CONTENTS enqueued."
+  (lparallel.queue:make-queue :initial-contents initial-contents))
 
 (defun mailbox-empty-p (mailbox)
   "Returns true if MAILBOX is currently empty, NIL otherwise."
-  (zerop (mailbox-count mailbox)))
+  (lparallel.queue:queue-empty-p mailbox))
 
 (defun mailbox-send-message (mailbox message)
   "Adds a MESSAGE to MAILBOX. Message can be any object."
-  #- (or ccl sbcl lispworks)
-  (error "not implemented")
-  (progn
-    #+ccl (ccl::atomic-incf (car mailbox))
-    #+sbcl (sb-ext:atomic-incf (atomic-place-val (car mailbox)))
-    #+lispworks (system:atomic-incf (car mailbox))
-    (chanl:send (cdr mailbox) message)))
+  (lparallel.queue:push-queue message mailbox))
 
-(defun mailbox-receive-message (mailbox &key)
+(defun mailbox-receive-message (mailbox &key timeout)
   "Removes the oldest message from MAILBOX and returns it as the
 primary value. If MAILBOX is empty waits until a message arrives."
-  #- (or ccl sbcl lispworks)
-  (error "not implemented")
-  (prog1
-      (chanl:recv (cdr mailbox))
-    #+sbcl (sb-ext:atomic-decf (atomic-place-val (car mailbox)))
-    #+ccl (ccl::atomic-decf (car mailbox))
-    #+lispworks (system:atomic-decf (car mailbox))))
+  (if timeout
+      (lparallel.queue:try-pop-queue mailbox :timeout timeout)
+      (lparallel.queue:pop-queue mailbox)))
 
 (defun mailbox-receive-message-no-hang (mailbox)
   "The non-blocking variant of RECEIVE-MESSAGE. Returns two values,
 the message removed from MAILBOX, and a flag specifying whether a
 message could be received."
-  #- (or ccl sbcl lispworks)
-  (error "not implemented")
-  (multiple-value-bind (message found)
-      (chanl:recv (cdr mailbox) :blockp nil)
-    (when found
-      #+sbcl (sb-ext:atomic-decf (atomic-place-val (car mailbox)))
-      #+ccl (ccl::atomic-decf (car mailbox))
-      #+lispworks (system:atomic-decf (car mailbox)))
-    (values message found)))
+  (lparallel.queue:try-pop-queue mailbox))
 
 (defun mailbox-count (mailbox)
   "The non-blocking variant of RECEIVE-MESSAGE. Returns two values,
 the message removed from MAILBOX, and a flag specifying whether a
 message could be received."
-  #+sbcl (atomic-place-val (car mailbox))
-  #-sbcl (car mailbox))
+  (lparallel.queue:queue-count mailbox))
 
 (defun mailbox-list-messages (mailbox)
   "Returns a fresh list containing all the messages in the
@@ -121,4 +84,3 @@ right after X."
      do (setf (values msg found) (mailbox-receive-message-no-hang mailbox))
      while found
      collect msg))
-

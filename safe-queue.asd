@@ -11,10 +11,11 @@
   :maintainer "Ilya Khaprov <ilya.khaprov@publitechs.com>"
   :author "3b <https://github.com/3b>"
   :licence "MIT"
-  :depends-on (#+sbcl "sb-concurrency"
-               #-sbcl "chanl")
+  :depends-on ("split-sequence"
+               #+sbcl "sb-concurrency"
+               #-sbcl "lparallel")
   :serial t
   :components ((:file "src/package")
                #+sbcl(:file "src/sb-concurrency-patch")
                #+sbcl(:file "src/concurrency-sbcl")
-               #-sbcl(:file "src/concurrency-chanl")))
+               #-sbcl(:file "src/concurrency-lparallel")))
