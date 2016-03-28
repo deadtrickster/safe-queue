@@ -6,7 +6,7 @@
 (in-package :safe-queue-system)
 
 (defsystem :safe-queue
-  :version "0.1"
+  :version "0.2"
   :description "Thread-safe queue and mailbox"
   :maintainer "Ilya Khaprov <ilya.khaprov@publitechs.com>"
   :author "3b <https://github.com/3b>"
