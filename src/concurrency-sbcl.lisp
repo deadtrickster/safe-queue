@@ -24,6 +24,14 @@ and T as secondary value. If the queue is empty, returns NIL as both primary
 and secondary value."
   (sb-concurrency:dequeue queue))
 
+(defun queue-count (queue)
+  "Returns the number of messages currently in the QUEUE."
+  (sb-concurrency:queue-count queue))
+
+(defun queue-empty-p (queue)
+  "Returns true if QUEUE is currently empty, NIL otherwise."
+  (sb-concurrency:queue-empty-p queue))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Mailboxes
 ;;;;  Thread safe queue with ability to do blocking reads
@@ -67,9 +75,7 @@ message could be received."
   (sb-concurrency:receive-message-no-hang mailbox))
 
 (defun mailbox-count (mailbox)
-  "The non-blocking variant of RECEIVE-MESSAGE. Returns two values,
-the message removed from MAILBOX, and a flag specifying whether a
-message could be received."
+  "Returns the number of messages currently in the MAILBOX."
   #+sbcl
   (sb-concurrency:mailbox-count mailbox))
 

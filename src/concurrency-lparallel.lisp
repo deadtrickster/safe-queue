@@ -23,6 +23,14 @@ and T as secondary value. If the queue is empty, returns NIL as both primary
 and secondary value."
   (lparallel.queue:try-pop-queue queue))
 
+(defun queue-count (queue)
+  "Returns the number of messages currently in the QUEUE."
+  (lparallel.queue:queue-count queue))
+
+(defun queue-empty-p (mailbox)
+  "Returns true if MAILBOX is currently empty, NIL otherwise."
+  (lparallel.queue:queue-empty-p queue))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Mailboxes
 ;;;;  Thread safe queue with ability to do blocking reads
@@ -58,9 +66,7 @@ message could be received."
   (lparallel.queue:try-pop-queue mailbox))
 
 (defun mailbox-count (mailbox)
-  "The non-blocking variant of RECEIVE-MESSAGE. Returns two values,
-the message removed from MAILBOX, and a flag specifying whether a
-message could be received."
+  "Returns the number of messages currently in the MAILBOX."
   (lparallel.queue:queue-count mailbox))
 
 (defun mailbox-list-messages (mailbox)

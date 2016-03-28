@@ -6,6 +6,8 @@
            #:make-queue
            #:enqueue
            #:dequeue
+           #:queue-count
+           #:queue-empty-p
            #:mailbox
            #:make-mailbox
            #:mailbox-empty-p
