@@ -27,8 +27,8 @@ and secondary value."
   "Returns the number of messages currently in the QUEUE."
   (lparallel.queue:queue-count queue))
 
-(defun queue-empty-p (mailbox)
-  "Returns true if MAILBOX is currently empty, NIL otherwise."
+(defun queue-empty-p (queue)
+  "Returns true if QUEUE is currently empty, NIL otherwise."
   (lparallel.queue:queue-empty-p queue))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
